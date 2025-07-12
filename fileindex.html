@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NAMMA-PAYANA - Customer Booking</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin:0; padding:0; height:100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #111; color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Login Screen   */
+  #login-screen {
+    background: linear-gradient(135deg, #222 0%, #444 100%);
+    border-radius: 15px;
+    box-shadow: 0 0 30px #fbbf24;
+    width: 350px;
+    padding: 30px;
+    text-align: center;
+  }
+  #login-screen h2 {
+    margin-bottom: 20px;
+    color: #fbbf24;
+  }
+  #login-screen input {
+    width: 90%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+  }
+  #login-screen button {
+    background: #fbbf24;
+    border: none;
+    padding: 12px 30px;
+    margin-top: 15px;
+    font-weight: 700;
+    color: #222;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #login-screen button:hover {
+    background: #d9a825;
+  }
+  #login-error {
+    margin-top: 10px;
+    color: #f87171;
+    font-weight: 600;
+  }
+  /* Background image behind login */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+    opacity: 0.15;
+    z-index: -1;
+  }
+
+  /* Customer Screen */
+  #customer-screen {
+    display: none;
+    width: 90vw;
+    max-width: 900px;
+    max-height: 90vh;
+    background: #222;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #fbbf24;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 1.3rem;
+  }
+  nav h1 {
+    flex-grow: 1;
+    font-weight: 900;
+  }
+  nav button, nav select {
+    background: #333;
+    border: 1px solid #555;
+    color: #fbbf24;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  nav button:hover, nav select:hover {
+    background: #444;
+  }
+
+  /* Bookings Container */
+  #customer-bookings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .booking-card {
+    background: #111;
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-shadow: 0 0 15px #fbbf24;
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .booking-id {
+    font-weight: 700;
+    color: #fbbf24;
+  }
+  .status {
+    padding: 5px 12px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .status.confirmation { background: #facc15; color: #222; }
+  .status.ongoing { background: #2563eb; color: #fff; }
+  .status.completed { background: #22c55e; color: #fff; }
+  .status.cancelled { background: #ef4444; color: #fff; }
+
+  .booking-info {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+  .location-link {
+    color: #fbbf24;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .location-link:focus {
+    outline: 2px solid #fbbf24;
+  }
+
+  /* New Booking Form Modal */
+  #new-booking-form-container {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #new-booking-form {
+    background: #222;
+    padding: 20px 25px;
+    border-radius: 15px;
+    width: 380px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 25px #fbbf24;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #new-booking-form h3 {
+    color: #fbbf24;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  #new-booking-form label {
+    font-weight: 600;
+  }
+  #new-booking-form input,
+  #new-booking-form select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    background: #333;
+    color: #eee;
+    font-size: 1rem;
+    outline: none;
+  }
+  #new-booking-form input::placeholder {
+    color: #bbb;
+  }
+  #new-booking-form button {
+    background: #fbbf24;
+    border: none;
+    padding: 12px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #new-booking-form button:hover {
+    background: #d9a825;
+  }
+  #fare-estimate {
+    margin-top: 5px;
+    font-weight: 700;
+    color: #fbbf24;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  #map-preview {
+    width: 100%;
+    height: 150px;
+    border-radius: 12px;
+    border: none;
+    margin-top: 6px;
+    background: #111;
+  }
+
+  /* Confirmation message container */
+  #confirmation-container {
+    background: #222;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 30px #22c55e;
+    margin-top: 15px;
+    display: none;
+    animation: fadeIn 0.7s ease forwards;
+  }
+  @keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+  }
+  #confirmation-container h2 {
+    color: #22c55e;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  #vendor-info {
+    margin-top: 10px;
+  }
+  #vendor-info p {
+    margin: 5px 0;
+  }
+  #vendor-map {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    border: none;
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen" role="main" aria-label="Customer Login Screen">
+  <h2>Welcome to NAMMA-PAYANA</h2>
+  <input type="text" id="username" placeholder="Enter username" autocomplete="username" aria-label="Username" />
+  <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" aria-label="Password" />
+  <button id="login-btn">Login</button>
+  <div id="login-error" role="alert" aria-live="assertive"></div>
+</div>
+
+<!-- Customer Screen -->
+<div id="customer-screen" role="main" aria-label="Customer Booking Screen" tabindex="0">
+  <nav>
+    <h1>NAMMA-PAYANA</h1>
+    <button id="new-booking-btn" aria-haspopup="dialog" aria-controls="new-booking-form-container">New Booking</button>
+    <button id="logout-btn">Logout</button>
+  </nav>
+
+  <div id="customer-bookings-container" aria-live="polite" aria-relevant="additions"></div>
+
+  <!-- Confirmation and vendor info -->
+  <div id="confirmation-container" aria-live="polite"></div>
+</div>
+
+<!-- New Booking Form Modal -->
+<div id="new-booking-form-container" role="dialog" aria-modal="true" aria-labelledby="new-booking-title">
+  <form id="new-booking-form">
+    <h3 id="new-booking-title">New Booking</h3>
+    <label for="pickup-location">Pickup Location</label>
+    <input type="text" id="pickup-location" name="pickup-location" placeholder="Enter pickup location" required autocomplete="off" />
+    
+    <label for="drop-location">Drop Location</label>
+    <input type="text" id="drop-location" name="drop-location" placeholder="Enter drop location" required autocomplete="off" />
+
+    <label for="distance-km">Distance (KM)</label>
+    <input type="number" id="distance-km" name="distance-km" placeholder="Enter distance in KM" required min="1" step="0.1" />
+
+    <button type="submit">Confirm Booking</button>
+    <button type="button" id="cancel-booking-btn" style="background:#444; margin-top:10px;">Cancel</button>
+
+    <iframe id="map-preview" aria-label="Map Preview" src="" frameborder="0" allowfullscreen></iframe>
+  </form>
+</div>
+
+<script>
+  // Hardcoded valid credentials
+  const USERNAME = 'user';
+  const PASSWORD = 'password';
+
+  // Vendors mock data for demo (to show after confirmation)
+  const vendors = [
+    { vehicleName: "Namma Vehicle 1", carName: "Toyota Innova", phone: "+91 9876543210" },
+    { vehicleName: "Namma Vehicle 2", carName: "Honda City", phone: "+91 9123456789" },
+    { vehicleName: "Namma Vehicle 3", carName: "Mahindra XUV", phone: "+91 9988776655" }
+  ];
+
+  // Elements references
+  const loginScreen = document.getElementById('login-screen');
+  const customerScreen = document.getElementById('customer-screen');
+  const loginBtn = document.getElementById('login-btn');
+  const loginError = document.getElementById('login-error');
+  const logoutBtn = document.getElementById('logout-btn');
+  const newBookingBtn = document.getElementById('new-booking-btn');
+  const bookingsContainer = document.getElementById('customer-bookings-container');
+  const newBookingFormContainer = document.getElementById('new-booking-form-container');
+  const newBookingForm = document.getElementById('new-booking-form');
+  const cancelBookingBtn = document.getElementById('cancel-booking-btn');
+  const confirmationContainer = document.getElementById('confirmation-container');
+  const mapPreview = document.getElementById('map-preview');
+
+  // Store bookings in-memory
+  let bookings = [];
+  let bookingCount = 0;
+
+  // Login handler
+  loginBtn.addEventListener('click', () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if(username === USERNAME && password === PASSWORD) {
+      loginError.textContent = '';
+      loginScreen.style.display = 'none';
+      customerScreen.style.display = 'block';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      refreshBookings();
+    } else {
+      loginError.textContent = 'Invalid username or password.';
+    }
+  });
+  function showConfirmation(booking) {
+  confirmationContainer.style.display = 'block';
+  confirmationContainer.innerHTML = `
+    <h2>Thank you for your booking!</h2>
+    <p>Your booking <strong>#${booking.id}</strong> is confirmed.</p>
+    <div id="vendor-info" tabindex="0">
+      <h3>Vendor Details:</h3>
+      <p><strong>Vehicle Name:</strong> ${booking.vendor.vehicleName}</p>
+      <p><strong>Car Name:</strong> ${booking.vendor.carName}</p>
+      <p><strong>Phone Number:</strong> <a href="tel:${booking.vendor.phone.replace(/\s+/g, '')}" style="color:#fbbf24;">${booking.vendor.phone}</a></p>
+      <p><strong>Distance:</strong> ${booking.distanceKM} KM</p>
+      <iframe id="vendor-map" src="https://maps.google.com/maps?q=${encodeURIComponent(booking.pickup)} to ${encodeURIComponent(booking.drop)}&output=embed" frameborder="0" allowfullscreen="" aria-label="Map showing pickup and drop locations"></iframe>
+    </div>
+
+    <!-- New Status Demo Section -->
+    <section id="status-demo" style="margin-top:20px;">
+      <h3>Status Demonstrations:</h3>
+      <div style="background:#fbbf2455;padding:10px;border-radius:8px;margin-bottom:8px;">
+        <strong>Confirmed:</strong> Your booking is confirmed and driver will arrive shortly.
+      </div>
+      <div style="background:#2563eb55;padding:10px;border-radius:8px;margin-bottom:8px;color:#fff;">
+        <strong>Ongoing:</strong> Your trip is currently in progress.
+      </div>
+      <div style="background:#ef444455;padding:10px;border-radius:8px;color:#fff;">
+        <strong>Cancelled:</strong> This booking has been cancelled. Please contact support for help.
+      </div>
+    </section>
+  `;
+  confirmationContainer.focus();
+}
+
+
+  // Logout handler
+  logoutBtn.addEventListener('click', () => {
+    customerScreen.style.display = 'none';
+    confirmationContainer.style.display = 'none';
+    bookingsContainer.innerHTML = '';
+    loginScreen.style.display = 'block';
+  });
+
+  // Open new booking form
+  newBookingBtn.addEventListener('click', () => {
+    newBookingFormContainer.style.display = 'flex';
+    confirmationContainer.style.display = 'none';
+    newBookingForm.reset();
+    mapPreview.src = '';
+    document.getElementById('pickup-location').focus();
+  });
+
+  // Cancel new booking
+  cancelBookingBtn.addEventListener('click', () => {
+    newBookingFormContainer.style.display = 'none';
+  });
+
+  // Update map preview URL helper (uses Google Maps embed)
+  function updateMapPreview(pickup, drop) {
+    if(!pickup || !drop) {
+      mapPreview.src = '';
+      return;
+    }
+    const baseURL = 'https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-INSERT-YOUR-API-KEY&origin=';
+    // For demo, we can't use a real API key, so use basic URL format:
+    // Use directions from pickup to drop locations
+    // As we can't use real Google Maps API key here, we will build a URL without API key that works in iframe:
+
+    // Encode params
+    const origin = encodeURIComponent(pickup);
+    const destination = encodeURIComponent(drop);
+
+    // Use Google Maps directions embed without key (may be limited)
+    mapPreview.src = `https://maps.google.com/maps?q=${origin} to ${destination}&output=embed`;
+  }
+
+  // On input change update map preview
+  const pickupInput = document.getElementById('pickup-location');
+  const dropInput = document.getElementById('drop-location');
+
+  pickupInput.addEventListener('input', () => {
+    updateMapPreview(pickupInput.value.trim(), dropInput.value.trim());
+  });
+  dropInput.addEventListener('input', () => {
+    updateMapPreview(pickupInput.value.trim(), dropInput.value.trim());
+  });
+
+  // Add booking function
+  newBookingForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const pickup = pickupInput.value.trim();
+    const drop = dropInput.value.trim();
+    const distanceKM = parseFloat(document.getElementById('distance-km').value);
+
+    if (!pickup || !drop || isNaN(distanceKM) || distanceKM <= 0) {
+      alert('Please enter valid pickup, drop locations and distance.');
+      return;
+    }
+
+    // Generate new booking object
+    bookingCount++;
+    const newBooking = {
+      id: bookingCount,
+      pickup,
+      drop,
+      distanceKM: distanceKM.toFixed(1),
+      status: 'confirmation',
+      vendor: vendors[(bookingCount - 1) % vendors.length] // cycle vendors for demo
+    };
+
+    bookings.push(newBooking);
+    newBookingFormContainer.style.display = 'none';
+    refreshBookings();
+
+    // Show confirmation message + vendor info
+    showConfirmation(newBooking);
+  });
+
+  // Refresh booking cards list with smooth slide animation
+  function refreshBookings() {
+    bookingsContainer.innerHTML = '';
+    bookings.forEach((b, i) => {
+      const card = document.createElement('div');
+      card.className = 'booking-card';
+      card.style.animationDelay = (i * 0.1) + 's';
+
+      card.innerHTML = `
+        <div class="booking-header">
+          <div class="booking-id">Booking #${b.id}</div>
+          <div class="status confirmation">${b.status}</div>
+        </div>
+        <div class="booking-info"><strong>Pickup:</strong> ${b.pickup}</div>
+        <div class="booking-info"><strong>Drop:</strong> ${b.drop}</div>
+        <div class="booking-info"><strong>Distance:</strong> ${b.distanceKM} KM</div>
+      `;
+
+      bookingsContainer.appendChild(card);
+    });
+  }
+
+  // Show confirmation + vendor info on UI
+  function showConfirmation(booking) {
+    confirmationContainer.style.display = 'block';
+    confirmationContainer.innerHTML = `
+      <h2>Thank you for your booking!</h2>
+      <p>Your booking <strong>#${booking.id}</strong> is confirmed.</p>
+      <div id="vendor-info" tabindex="0">
+        <h3>Vendor Details:</h3>
+        <p><strong>Vehicle Name:</strong> ${booking.vendor.vehicleName}</p>
+        <p><strong>Car Name:</strong> ${booking.vendor.carName}</p>
+        <p><strong>Phone Number:</strong> <a href="tel:${booking.vendor.phone.replace(/\s+/g, '')}" style="color:#fbbf24;">${booking.vendor.phone}</a></p>
+        <p><strong>Distance:</strong> ${booking.distanceKM} KM</p>
+        <iframe id="vendor-map" src="https://maps.google.com/maps?q=${encodeURIComponent(booking.pickup)} to ${encodeURIComponent(booking.drop)}&output=embed" frameborder="0" allowfullscreen="" aria-label="Map showing pickup and drop locations"></iframe>
+      </div>
+    ` ;
+    confirmationContainer.focus();
+  }
+
+  // Accessibility: trap focus inside modal (for new booking form)
+  newBookingFormContainer.addEventListener('keydown', e => {
+    if(e.key === 'Escape')
+     {
+      newBookingFormContainer.style.display = 'none';
+    }
+  });
+
+  // Enter key on login triggers login
+  document.getElementById('password').addEventListener('keypress', e => {
+    if(e.key === 'Enter') loginBtn.click();
+  });
+  document.getElementById('username').addEventListener('keypress', e => {
+    if(e.key === 'Enter') loginBtn.click();
+  });
+</script>
+
+</body>
+</html>
