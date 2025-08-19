@@ -26,8 +26,9 @@ Built using **HTML, CSS, and JavaScript (frontend only)**.
 ---
 
 ## 🚀 Live Demo
-🔗 [Customer Portal](https://navyashree1411.github.io/major-project/customer.html)  
-🔗 [Vendor Portal](https://navyashree1411.github.io/major-project/vendor.html)
+🔗 [Customer Portal](https://navyashree1411.github.io/major-project/cab%20booking/customer.html)  
+🔗 [Vendor Portal](https://navyashree1411.github.io/major-project/cab%20booking/vendor.html)
+
 
 ---
 
