@@ -31,6 +31,22 @@ Built using **HTML, CSS, and JavaScript (frontend only)**.
 
 
 ---
+🔑 Login Credentials
+
+Customer Portal:
+
+Username: user
+
+Password: password
+
+Vendor Portal:
+
+Username: vendor1
+
+Password: pass1234
+
+⚠️ These are demo credentials for accessing the frontend prototype.
+---
 
 ## 🛠️ Tech Stack
 - HTML5
