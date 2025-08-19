@@ -22,3 +22,22 @@ Built using **HTML, CSS, and JavaScript (frontend only)**.
 ---
 
 ## 📂 Project Structure
+
+---
+
+## 🚀 Live Demo
+🔗 [Customer Portal](https://navyashree1411.github.io/major-project/customer.html)  
+🔗 [Vendor Portal](https://navyashree1411.github.io/major-project/vendor.html)
+
+---
+
+## 🛠️ Tech Stack
+- HTML5
+- CSS3
+- Vanilla JavaScript
+
+---
+
+## 📌 Note
+This is a **frontend-only prototype**. Backend integration (databases, authentication, APIs) can be added later.
+
